@@ -17,3 +17,4 @@ jobs:
       - run: python -m phiworldforge pack examples/arclight-room /tmp/arclight-genesis.zip
 
       - run: python -m phiworldforge catalog --check
+      - run: node --check viewer/app.js

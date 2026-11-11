@@ -65,3 +65,10 @@ footer {
   .panel .caption { display: none; }
   footer { padding: 15px; font-size: 9px; }
 }
+
+.world-toolbar { display:flex; align-items:center; gap:10px; }
+.world-toolbar label { font-size:10px; color:#7dbece; letter-spacing:.14em; }
+.world-toolbar select { max-width:260px; min-width:160px; padding:9px 12px; background:#061a2b; color:#d5f8ff; border:1px solid #468b9e; border-radius:6px; font:600 12px "Segoe UI",sans-serif; }
+.world-toolbar select:disabled { opacity:.55; }
+@media (max-width:900px) { .masthead .pill { display:none; } }
+@media (max-width:720px) { .world-toolbar { display:block; } .world-toolbar label { display:none; } .world-toolbar select { min-width:120px; max-width:155px; font-size:10px; } }

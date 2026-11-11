@@ -88,76 +88,173 @@ function transform(object, item) {
 const glbLoader = new GLTFLoader();
 const objLoader = new OBJLoader();
 
-async function showWorld() {
-  const url = new URL("../examples/arclight-room/world.json", window.location.href);
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Cannot load world.json (HTTP " + response.status + ")");
-  const data = await response.json();
-  if (data.schema !== "phiworldforge.scene/0.1" || data.units !== "meters" || data.up_axis !== "Y") {
-    throw new Error("Unsupported scene schema, units, or up-axis");
+const worldLayer = new THREE.Group();
+scene.add(worldLayer);
+const selector = document.querySelector("#world-selector");
+const audioToggle = document.querySelector("#audio-toggle");
+let playingAudio = null;
+
+function validAsset(path) {
+  return typeof path === "string" && path.startsWith("assets/") &&
+    !path.includes("\\") && !path.includes(":") &&
+    path.split("/").every(p => p !== "" && p !== "." && p !== "..");
+}
+
+function clearWorld() {
+  if (playingAudio) {
+    playingAudio.pause();
+    playingAudio.src = "";
+    playingAudio = null;
   }
-  let loaded = 0;
-  let failed = 0;
-  for (const item of data.entities) {
-    try {
-      let object;
-      if (item.kind === "box") {
-        object = new THREE.Mesh(
-          new THREE.BoxGeometry(...item.size),
-          new THREE.MeshStandardMaterial({
-            color: item.color, metalness: .55, roughness: .36,
-            opacity: item.opacity ?? 1, transparent: (item.opacity ?? 1) < 1,
-            side: THREE.DoubleSide
-          })
-        );
-      } else if (item.kind === "mesh") {
-        if (!item.asset.startsWith("assets/") || item.asset.includes("..")) {
-          throw new Error("Invalid relative mesh path");
-        }
-        const assetUrl = new URL(item.asset, url).href;
-        if (item.asset.toLowerCase().endsWith(".glb")) {
-          object = (await glbLoader.loadAsync(assetUrl)).scene;
-        } else if (item.asset.toLowerCase().endsWith(".obj")) {
-          object = await objLoader.loadAsync(assetUrl);
-        } else {
-          throw new Error("Unsupported viewer mesh format");
-        }
-      } else {
-        throw new Error("Unknown entity kind");
-      }
-      transform(object, item);
-      object.name = item.id;
-      scene.add(object);
-      loaded++;
-    } catch (error) {
-      failed++;
-      console.error("Entity failed:", item.id, error);
-    }
-  }
-  count.textContent = String(loaded) + " / " + data.entities.length;
-  status.textContent = failed ? "Scene loaded with " + failed + " asset error(s)" : "Scene loaded · orbit or move to explore";
-  if (data.environment_splat) {
-    status.textContent += " · SPZ rendering not implemented";
-  }
-  if (data.ambient_audio && data.ambient_audio.startsWith("assets/") && !data.ambient_audio.includes("..")) {
-    const audio = new Audio(new URL(data.ambient_audio, url).href);
-    audio.loop = true;
-    const toggle = document.querySelector("#audio-toggle");
-    toggle.hidden = false;
-    toggle.addEventListener("click", async () => {
-      if (audio.paused) {
-        try {
-          await audio.play();
-          toggle.textContent = "Pause ambience";
-        } catch (error) {
-          status.textContent = "Audio playback blocked by browser";
-        }
-      } else {
-        audio.pause();
-        toggle.textContent = "Play ambience";
-      }
+  audioToggle.hidden = true;
+  audioToggle.textContent = "Play ambience";
+  worldLayer.traverse(object => {
+    if (object.geometry) object.geometry.dispose();
+    const list = object.material ? (Array.isArray(object.material) ? object.material : [object.material]) : [];
+    list.forEach(material => {
+      for (const value of Object.values(material)) if (value && value.isTexture) value.dispose();
+      material.dispose();
     });
+  });
+  worldLayer.clear();
+}
+
+function showCollider(object) {
+  object.traverse(mesh => {
+    if (!mesh.isMesh) return;
+    const old = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    old.filter(Boolean).forEach(material => material.dispose());
+    mesh.material = new THREE.MeshBasicMaterial({
+      color: "#63e9ef", wireframe: true, transparent: true, opacity: 0.35,
+      depthWrite: false, side: THREE.DoubleSide
+    });
+  });
+}
+
+async function showWorld(entry) {
+  selector.disabled = true;
+  status.textContent = "Loading " + entry.title + "…";
+  count.textContent = "--";
+  clearWorld();
+  try {
+    if (!/^\.\.\/examples\/[a-z][a-z0-9-]{0,63}\/world\.json$/.test(entry.manifest)) {
+      throw new Error("Invalid manifest route");
+    }
+    const url = new URL(entry.manifest, import.meta.url);
+    if (url.origin !== window.location.origin) throw new Error("Cross-origin world denied");
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("World fetch HTTP " + response.status);
+    const data = await response.json();
+    if (data.schema !== "phiworldforge.scene/0.1" || data.units !== "meters" ||
+        data.up_axis !== "Y" || !Array.isArray(data.entities)) {
+      throw new Error("Invalid scene schema");
+    }
+    let loaded = 0;
+    let failed = 0;
+    for (const item of data.entities) {
+      try {
+        let object;
+        if (item.kind === "box") {
+          object = new THREE.Mesh(
+            new THREE.BoxGeometry(...item.size),
+            new THREE.MeshStandardMaterial({
+              color: item.color, metalness: .55, roughness: .36,
+              opacity: item.opacity ?? 1, transparent: (item.opacity ?? 1) < 1,
+              side: THREE.DoubleSide
+            })
+          );
+        } else if (item.kind === "mesh") {
+          if (!validAsset(item.asset)) throw new Error("Invalid local asset path");
+          const assetUrl = new URL(item.asset, url).href;
+          if (item.asset.toLowerCase().endsWith(".glb")) {
+            object = (await glbLoader.loadAsync(assetUrl)).scene;
+          } else if (item.asset.toLowerCase().endsWith(".obj")) {
+            object = await objLoader.loadAsync(assetUrl);
+          } else throw new Error("Unsupported mesh extension");
+          if (item.role === "collider-preview") showCollider(object);
+        } else throw new Error("Unknown entity type");
+        transform(object, item);
+        object.name = item.id;
+        worldLayer.add(object);
+        loaded++;
+      } catch (error) {
+        console.error("Asset load error:", item.id, error);
+        failed++;
+      }
+    }
+    count.textContent = String(loaded) + " / " + data.entities.length;
+    document.querySelector("#current-title").textContent = data.title;
+    if (entry.id !== "arclight-genesis" && loaded) {
+      const bounds = new THREE.Box3().setFromObject(worldLayer);
+      if (!bounds.isEmpty()) {
+        const center = bounds.getCenter(new THREE.Vector3());
+        const radius = Math.max(3, bounds.getSize(new THREE.Vector3()).length());
+        controls.target.copy(center);
+        camera.position.copy(center).add(new THREE.Vector3(radius * .65, radius * .35, radius * .85));
+        controls.update();
+      }
+    } else {
+      controls.target.set(0, 2, 0);
+      camera.position.set(8, 4, 10);
+      controls.update();
+    }
+    let message = failed ? String(failed) + " entities failed" : "Scene loaded";
+    if (data.source?.type === "image-blaster") message += " · collider preview only";
+    if (data.environment_splat) message += " · SPZ rendering not implemented";
+    status.textContent = message;
+    if (validAsset(data.ambient_audio) && /\.(mp3|wav|ogg)$/i.test(data.ambient_audio)) {
+      playingAudio = new Audio(new URL(data.ambient_audio, url).href);
+      playingAudio.loop = true;
+      audioToggle.hidden = false;
+    }
+    const address = new URL(window.location.href);
+    address.searchParams.set("world", entry.id);
+    history.replaceState(null, "", address.href);
+  } finally {
+    selector.disabled = false;
   }
+}
+
+audioToggle.addEventListener("click", async () => {
+  if (!playingAudio) return;
+  if (playingAudio.paused) {
+    try {
+      await playingAudio.play();
+      audioToggle.textContent = "Pause ambience";
+    } catch (error) {
+      status.textContent = "Audio unavailable: " + error.message;
+    }
+  } else {
+    playingAudio.pause();
+    audioToggle.textContent = "Play ambience";
+  }
+});
+
+async function loadGallery() {
+  const response = await fetch(new URL("./worlds.json", import.meta.url), { cache: "no-store" });
+  if (!response.ok) throw new Error("Catalog fetch HTTP " + response.status);
+  const gallery = await response.json();
+  if (gallery.schema !== "phiworldforge.catalog/0.1" || !Array.isArray(gallery.worlds) || !gallery.worlds.length) {
+    throw new Error("Invalid world catalog");
+  }
+  selector.replaceChildren();
+  gallery.worlds.forEach(entry => {
+    const option = document.createElement("option");
+    option.value = entry.id;
+    option.textContent = entry.title;
+    selector.appendChild(option);
+  });
+  const requestedId = new URL(location.href).searchParams.get("world");
+  const first = gallery.worlds.find(entry => entry.id === requestedId) || gallery.worlds[0];
+  selector.value = first.id;
+  selector.addEventListener("change", () => {
+    const next = gallery.worlds.find(entry => entry.id === selector.value);
+    if (next) showWorld(next).catch(error => {
+      console.error(error);
+      status.textContent = "Scene load failed: " + error.message;
+    });
+  });
+  await showWorld(first);
 }
 
 const keys = new Set();
@@ -202,7 +299,7 @@ addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
-showWorld().catch(error => {
+loadGallery().catch(error => {
   console.error(error);
-  status.textContent = "Scene load failed: " + error.message;
+  status.textContent = "Gallery failed: " + error.message;
 });
