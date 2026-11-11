@@ -19,6 +19,23 @@ python -m http.server 8000
 
 Open **http://localhost:8000/viewer/**. Drag to orbit, scroll to zoom, use WASD and Q/E to translate the camera. If the browser and secure context support immersive VR, an experimental Enter VR button is provided; Quest 3 performance and interaction have not yet been verified.
 
+## Mission 2: import an Image-Blaster project
+
+Image-Blaster uses indexed local exports like `worlds/<slug>/output/world/0-world.glb` and `0-world-full_res.spz`. PhiWorldForge now recognizes the project layout directly, **without calling an image generation API**:
+
+```bash
+python -m phiworldforge import-image-blaster --project /path/to/image-blaster/worlds/my-room --output examples/my-room
+python -m phiworldforge catalog
+python -m phiworldforge validate examples/my-room
+python -m http.server 8000
+```
+
+Browse to `http://localhost:8000/viewer/` and select the world in the header. URLs support `?world=my-room`. The viewer shows the imported **collision mesh as transparent wireframe**, and loads optional local ambient audio after a click. **SPZ Gaussian splats are copied but NOT rendered yet.**
+
+Default import selects the highest existing generation number and first available SPZ resolution from `full_res`, `500k`, `150k`, `100k`. Use `--world-index 0 --quality 100k` to request a specific version. Files are copied, not modified in the source project. Regenerate `viewer/worlds.json` using the catalog command whenever worlds are added or removed.
+
+Dynamic object placement, splat calibration, actual physics, Unreal/MCP integration, and GPU performance verification remain on the roadmap. Imported collider meshes may not be visually attractive, because collision geometry is not the final rendered environment. See [Image-Blaster adapter notes](docs/IMAGE_BLASTER_IMPORT.md).
+
 ## Import Image-Blaster-compatible exports
 
 The upstream [image-blaster](https://github.com/neilsonnn/image-blaster) describes GLB/OBJ dynamic meshes, SPZ environment splats and MP3 audio. Export generation is external to ΦWorldForge; **no external API is called here**.
