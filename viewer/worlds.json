@@ -1,0 +1,10 @@
+{
+  "schema": "phiworldforge.catalog/0.1",
+  "worlds": [
+    {
+      "id": "arclight-genesis",
+      "title": "ARCLight Genesis Room",
+      "manifest": "../examples/arclight-room/world.json"
+    }
+  ]
+}
