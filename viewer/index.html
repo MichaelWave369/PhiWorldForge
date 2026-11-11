@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07111e">
+  <title>ΦWorldForge | ARCLight Genesis</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="viewport" aria-label="Interactive 3D viewport"></div>
+  <header class="masthead">
+    <div class="brand"><span class="phi">Φ</span><span>WORLD<span class="thin">FORGE</span></span><small>GENESIS / 001</small></div>
+    <div class="pill">ENGINE-NEUTRAL SCENE PROTOTYPE <span class="light-dot"></span></div>
+  </header>
+  <aside class="panel">
+    <span class="eyebrow">NOW EXPLORING</span>
+    <h1>ARCLight <span>Genesis Room</span></h1>
+    <p>A small proof that one portable scene description can become an explorable 3D space.</p>
+    <div class="divider"></div>
+    <div class="metric"><span>SCENE FORMAT</span><strong>v0.1</strong></div>
+    <div class="metric"><span>COORDINATES</span><strong>Y-UP · METERS</strong></div>
+    <div class="metric"><span>ENTITIES LOADED</span><strong id="entity-count">--</strong></div>
+    <div class="divider"></div>
+    <p class="caption">ORBIT: DRAG · ZOOM: SCROLL<br>MOVE: WASD · HEIGHT: Q / E<br>VR: BROWSER SUPPORT REQUIRED</p>
+    <p id="status" class="status" role="status">Loading scene…</p>
+    <button id="audio-toggle" hidden type="button">Play ambience</button>
+  </aside>
+  <footer>
+    <span>Φ369 LABS <span class="muted">/ ORIGINAL PROCEDURAL ROOM</span></span>
+    <span class="muted">GLB + OBJ PREVIEW · SPZ RENDERING PLANNED</span>
+  </footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
