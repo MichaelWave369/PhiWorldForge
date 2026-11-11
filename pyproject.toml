@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phiworldforge"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Engine-neutral 3D world packaging"
+license = { text = "MIT" }
+
+[project.scripts]
+phiworldforge = "phiworldforge.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["phiworldforge*"]

@@ -1,0 +1,280 @@
+{
+  "schema": "phiworldforge.scene/0.1",
+  "id": "arclight-genesis",
+  "title": "ARCLight Genesis Room",
+  "units": "meters",
+  "up_axis": "Y",
+  "spawn": [
+    0,
+    1.7,
+    7
+  ],
+  "source": {
+    "type": "procedural-demo",
+    "notes": "Original geometric placeholder; no AI-generated models"
+  },
+  "entities": [
+    {
+      "id": "floor",
+      "kind": "box",
+      "position": [
+        0,
+        -0.18,
+        0
+      ],
+      "size": [
+        14,
+        0.36,
+        14
+      ],
+      "color": "#0c1629",
+      "collidable": true
+    },
+    {
+      "id": "ceiling",
+      "kind": "box",
+      "position": [
+        0,
+        5.2,
+        0
+      ],
+      "size": [
+        14,
+        0.3,
+        14
+      ],
+      "color": "#162741"
+    },
+    {
+      "id": "left-wall",
+      "kind": "box",
+      "position": [
+        -7,
+        2.5,
+        0
+      ],
+      "size": [
+        0.4,
+        5.3,
+        14
+      ],
+      "color": "#1a3550",
+      "collidable": true
+    },
+    {
+      "id": "right-wall",
+      "kind": "box",
+      "position": [
+        7,
+        2.5,
+        0
+      ],
+      "size": [
+        0.4,
+        5.3,
+        14
+      ],
+      "color": "#1a3550",
+      "collidable": true
+    },
+    {
+      "id": "back-wall",
+      "kind": "box",
+      "position": [
+        0,
+        2.5,
+        7
+      ],
+      "size": [
+        14,
+        5.3,
+        0.4
+      ],
+      "color": "#16273b",
+      "collidable": true
+    },
+    {
+      "id": "front-window",
+      "kind": "box",
+      "position": [
+        0,
+        2.7,
+        -6.95
+      ],
+      "size": [
+        10.5,
+        3.9,
+        0.08
+      ],
+      "color": "#3976ac",
+      "opacity": 0.18
+    },
+    {
+      "id": "frame-left",
+      "kind": "box",
+      "position": [
+        -5.5,
+        2.65,
+        -6.9
+      ],
+      "size": [
+        0.45,
+        5.2,
+        0.4
+      ],
+      "color": "#4f809d"
+    },
+    {
+      "id": "frame-right",
+      "kind": "box",
+      "position": [
+        5.5,
+        2.65,
+        -6.9
+      ],
+      "size": [
+        0.45,
+        5.2,
+        0.4
+      ],
+      "color": "#4f809d"
+    },
+    {
+      "id": "frame-top",
+      "kind": "box",
+      "position": [
+        0,
+        5,
+        -6.9
+      ],
+      "size": [
+        11.4,
+        0.5,
+        0.4
+      ],
+      "color": "#4f809d"
+    },
+    {
+      "id": "frame-bottom",
+      "kind": "box",
+      "position": [
+        0,
+        0.3,
+        -6.9
+      ],
+      "size": [
+        11.4,
+        0.55,
+        0.4
+      ],
+      "color": "#4f809d"
+    },
+    {
+      "id": "frame-middle",
+      "kind": "box",
+      "position": [
+        0,
+        2.7,
+        -6.9
+      ],
+      "size": [
+        0.14,
+        4.6,
+        0.28
+      ],
+      "color": "#4f809d"
+    },
+    {
+      "id": "center-console",
+      "kind": "box",
+      "position": [
+        0,
+        0.62,
+        1.4
+      ],
+      "size": [
+        3.7,
+        1.24,
+        1.4
+      ],
+      "color": "#254b67",
+      "collidable": true
+    },
+    {
+      "id": "console-screen",
+      "kind": "box",
+      "position": [
+        0,
+        1.27,
+        1.13
+      ],
+      "size": [
+        3.1,
+        0.07,
+        0.9
+      ],
+      "color": "#45d9e6",
+      "opacity": 0.75
+    },
+    {
+      "id": "port-strip",
+      "kind": "box",
+      "position": [
+        -4.8,
+        0.05,
+        0
+      ],
+      "size": [
+        0.18,
+        0.11,
+        12
+      ],
+      "color": "#36cfe0"
+    },
+    {
+      "id": "starboard-strip",
+      "kind": "box",
+      "position": [
+        4.8,
+        0.05,
+        0
+      ],
+      "size": [
+        0.18,
+        0.11,
+        12
+      ],
+      "color": "#36cfe0"
+    },
+    {
+      "id": "door",
+      "kind": "box",
+      "position": [
+        0,
+        1.45,
+        6.77
+      ],
+      "size": [
+        2.2,
+        2.9,
+        0.07
+      ],
+      "color": "#28566c"
+    },
+    {
+      "id": "door-edge",
+      "kind": "box",
+      "position": [
+        -1.18,
+        1.45,
+        6.7
+      ],
+      "size": [
+        0.09,
+        3,
+        0.08
+      ],
+      "color": "#42c8db"
+    }
+  ]
+}
