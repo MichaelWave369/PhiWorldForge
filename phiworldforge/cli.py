@@ -3,6 +3,8 @@ import argparse
 import sys
 from pathlib import Path
 from .core import ingest_exports, pack_world, validate_world
+from .catalog import build_catalog
+from .image_blaster import import_project
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="phiworldforge", description="Portable world tools")
@@ -18,6 +20,15 @@ def main(argv=None):
     ingest.add_argument("--mesh", type=Path)
     ingest.add_argument("--splat", type=Path)
     ingest.add_argument("--audio", type=Path)
+    ib = sub.add_parser("import-image-blaster", help="convert local Image-Blaster worlds/<slug> exports")
+    ib.add_argument("--project", type=Path, required=True)
+    ib.add_argument("--output", type=Path, required=True)
+    ib.add_argument("--world-index", type=int)
+    ib.add_argument("--quality", default="auto", choices=["auto", "full_res", "500k", "150k", "100k"])
+    catalog = sub.add_parser("catalog", help="build or verify browser gallery index")
+    catalog.add_argument("--worlds", type=Path, default=Path("examples"))
+    catalog.add_argument("--output", type=Path, default=Path("viewer/worlds.json"))
+    catalog.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.action == "validate":
@@ -30,6 +41,12 @@ def main(argv=None):
         elif args.action == "pack":
             paths = pack_world(args.world, args.archive)
             print("PACKED:", args.archive, "files:", len(paths))
+        elif args.action == "import-image-blaster":
+            summary = import_project(args.project, args.output, world_index=args.world_index, quality=args.quality)
+            print("IMPORTED LOCAL IMAGE-BLASTER:", summary)
+        elif args.action == "catalog":
+            gallery = build_catalog(args.worlds, args.output, check=args.check)
+            print("GALLERY:", len(gallery["worlds"]), "worlds")
         else:
             path = ingest_exports(args.output, args.title, args.mesh, args.splat, args.audio)
             print("IMPORTED:", path)
